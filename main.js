@@ -35,6 +35,11 @@ const server = http.createServer(async (req, res) => {
       "credentials": "omit"
     });
 
+    if (res.headersSent) {
+      console.error('Headers already sent, aborting request');
+      return;
+    }
+
     req.on('close', () => {
       console.log('Client disconnected, aborting request');
       if (!response.body.locked) {
@@ -47,8 +52,10 @@ const server = http.createServer(async (req, res) => {
     await stream.pipeline(response.body, res, (error) => {
       if (error) {
         console.error('Pipeline failed:', error);
-        res.writeHead(500, { 'Content-Type': 'text/plain' });
-        res.end('Internal Server Error');
+        if (!res.headersSent) {
+          res.writeHead(500, { 'Content-Type': 'text/plain' });
+          res.end('Internal Server Error');
+        }
       }
     });
   }
