@@ -22,3 +22,8 @@ label, input, button {
   margin-top: 25px;
   margin-bottom: 25px;
 }
+
+img {
+  max-width: 100%;
+  height: auto;
+}
