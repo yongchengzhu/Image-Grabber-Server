@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const url = require('url');
+const stream = require('stream');
 
 const server = http.createServer(async (req, res) => {
   if (req.url === '/') {
@@ -33,10 +34,23 @@ const server = http.createServer(async (req, res) => {
       "mode": "cors",
       "credentials": "omit"
     });
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+
+    req.on('close', () => {
+      console.log('Client disconnected, aborting request');
+      if (!response.body.locked) {
+        response.body.cancel();
+      }
+    });
+
     res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end(buffer.toString('base64'));
+
+    await stream.pipeline(response.body, res, (error) => {
+      if (error) {
+        console.error('Pipeline failed:', error);
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Internal Server Error');
+      }
+    });
   }
 });
 

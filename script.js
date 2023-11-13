@@ -2,11 +2,32 @@ const getImages = async (url) => {
   document.querySelector('.content').innerHTML = '';
   const html = await (await fetch(`/search?url=${url}`)).text();
   const images = Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll('img')).map(img => img.src);
+
   for (const image of images) {
-    const imageData = await (await fetch(`/image?url=${image}`)).text();
-    document.querySelector('.content').appendChild(Object.assign(document.createElement('img'), { src: `data:image/jpeg;base64,${imageData}` }));
+    const page = document.createElement('img');
+    document.querySelector('.content').appendChild(page);
+    try {
+      const response = await fetch(`/image?url=${image}`);
+      if (!response.ok)
+        continue;
+      const chunks = [];
+      const reader = response.body.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done)
+          break;
+        chunks.push(value);
+      }
+      const concatenatedChunks = new Uint8Array(chunks.reduce((acc, chunk) => acc.concat(Array.from(chunk)), []));
+      const chunkBlob = new Blob([concatenatedChunks], { type: 'image/jpeg' });
+      const chunkUrl = URL.createObjectURL(chunkBlob);
+      page.onload = () => URL.revokeObjectURL(chunkUrl);
+      page.src = chunkUrl;
+    } catch (error) {
+      console.error(`Error fetching image: ${image}`, error);
+    }
   }
-}
+};
 
 const getChapters = async (url) => {
   document.querySelector('.content').innerHTML = '';
