@@ -38,25 +38,22 @@ const getImages = async (url) => {
     }
   };
 
-  addButton('navi-change-chapter-btn-prev', 'Previous Chapter', /<a[^>]+class="[^"]*navi-change-chapter-btn-prev[^"]*"[^>]*href="([^"]+)"[^>]*>/);
-  addButton('navi-change-chapter-btn-next', 'Next Chapter', /<a[^>]+class="[^"]*navi-change-chapter-btn-next[^"]*"[^>]*href="([^"]+)"[^>]*>/);
-
   const matches = Array.from(html.matchAll(/<img[^>]+src="([^"]+)"[^>]*>/g));
 
   // Map each image to a function that returns a promise
   const imagePromises = matches.map(({ 1: image }) => () => createImg(image));
 
+  addButton('navi-change-chapter-btn-prev', 'Previous Chapter', /<a[^>]+class="[^"]*navi-change-chapter-btn-prev[^"]*"[^>]*href="([^"]+)"[^>]*>/);
+  addButton('navi-change-chapter-btn-next', 'Next Chapter', /<a[^>]+class="[^"]*navi-change-chapter-btn-next[^"]*"[^>]*href="([^"]+)"[^>]*>/);
+
   // Execute promises sequentially
   for (const promiseFn of imagePromises) {
     await promiseFn();
   }
+
+  addButton('navi-change-chapter-btn-prev', 'Previous Chapter', /<a[^>]+class="[^"]*navi-change-chapter-btn-prev[^"]*"[^>]*href="([^"]+)"[^>]*>/);
+  addButton('navi-change-chapter-btn-next', 'Next Chapter', /<a[^>]+class="[^"]*navi-change-chapter-btn-next[^"]*"[^>]*href="([^"]+)"[^>]*>/);
 };
-
-
-
-
-
-
 
 const fetchTextContents = async (url, className, handleClick) => {
   const contentElement = document.querySelector('.content');
