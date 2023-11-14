@@ -15,6 +15,8 @@ const server = http.createServer(async (req, res) => {
     }
   };
 
+  let abortController = new AbortController();
+
   if (req.url === '/') {
     await sendFile('index.html', 'text/html');
   } else if (req.url === '/script.js') {
@@ -26,19 +28,23 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end(await (await fetch(searchURL)).text());
   } else if (req.url.startsWith('/image')) {
+    abortController.abort();
+    abortController = new AbortController();
+
     const { query } = url.parse(req.url, true);
     const response = await fetch(query.url, {
+      signal: abortController.signal,
       headers: {
         "sec-ch-ua": "\"Google Chrome\";v=\"119\", \"Chromium\";v=\"119\", \"Not?A_Brand\";v=\"24\"",
         "sec-ch-ua-mobile": "?0",
-        "sec-ch-ua-platform": "\"macOS\""
+        "sec-ch-ua-platform": "\"macOS\"",
       },
       referrer: "https://chapmanganato.com/",
       referrerPolicy: "strict-origin-when-cross-origin",
       body: null,
       method: "GET",
       mode: "cors",
-      credentials: "omit"
+      credentials: "omit",
     });
 
     if (res.headersSent) {
@@ -48,7 +54,7 @@ const server = http.createServer(async (req, res) => {
 
     req.on('close', () => {
       console.log('Client disconnected, aborting request');
-      if (!response.body.locked) response.body.cancel();
+      abortController.abort();
     });
 
     res.writeHead(200, { 'Content-Type': 'text/plain' });
