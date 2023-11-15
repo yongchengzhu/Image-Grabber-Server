@@ -82,6 +82,7 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(process.env.PORT || 3000, () => {
+server.listen(process.env.PORT || 3000, async () => {
+  await fs.mkdir(path.join(__dirname, 'images'), { recursive: true });
   console.log('Server is up.');
 });
