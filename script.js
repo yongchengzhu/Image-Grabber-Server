@@ -44,6 +44,8 @@ const getImages = async (url) => {
 
   const html = await (await fetch(`/search?url=${url}`)).text();
 
+  document.querySelector('.content').appendChild(Object.assign(document.createElement('h1'), { textContent: (new DOMParser().parseFromString(html, 'text/html').querySelector('h1') || {}).textContent }));
+
   const createButton = (className, textContent, href) => {
     const button = contentElement.appendChild(Object.assign(document.createElement('button'), { textContent, className }));
     button.onclick = () => navigateTo(href);
