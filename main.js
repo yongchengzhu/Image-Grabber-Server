@@ -17,17 +17,15 @@ const server = http.createServer(async (req, res) => {
 
   let abortController = new AbortController();
 
-  if (req.url === '/') {
-    await sendFile('index.html', 'text/html');
-  } else if (req.url === '/script.js') {
+  if (req.url === '/script.js') {
     await sendFile('script.js', 'application/javascript');
   } else if (req.url === '/style.css') {
     await sendFile('style.css', 'text/css');
-  } else if (req.url.startsWith('/search')) {
+  } else if (req.url.startsWith('/search?url=')) {
     const searchURL = url.parse(req.url, true).query.url;
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end(await (await fetch(searchURL)).text());
-  } else if (req.url.startsWith('/image')) {
+  } else if (req.url.startsWith('/image?url=')) {
     abortController.abort();
     abortController = new AbortController();
 
@@ -66,6 +64,8 @@ const server = http.createServer(async (req, res) => {
         res.end('Internal Server Error');
       }
     });
+  } else {
+    await sendFile('index.html', 'text/html');
   }
 });
 
