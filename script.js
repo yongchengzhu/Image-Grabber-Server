@@ -60,10 +60,9 @@ const getImages = async (url) => {
     try {
       const response = await fetch(`/image?url=${src}`);
       if (response.ok) {
-        const blob = await response.blob();
+        const imagePath = await response.text();
         const img = Object.assign(document.createElement('img'), {
-          onload: () => URL.revokeObjectURL(src),
-          src: URL.createObjectURL(blob),
+          src: '/' + imagePath,
         });
         contentElement.appendChild(img);
         return img;
@@ -83,7 +82,11 @@ const getImages = async (url) => {
 
   // Execute promises sequentially
   for (const promiseFn of imagePromises) {
+    const startPerformance = performance.now();
     await promiseFn();
+    const endPerformance = performance.now();
+    const executionTimePerformance = endPerformance - startPerformance;
+    console.log(`Execution time: ${executionTimePerformance} milliseconds`);
   }
 
   addButton('navi-change-chapter-btn-prev', 'Previous Chapter', /<a[^>]+class="[^"]*navi-change-chapter-btn-prev[^"]*"[^>]*href="([^"]+)"[^>]*>/);
