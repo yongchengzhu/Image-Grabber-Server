@@ -60,9 +60,9 @@ const getImages = async (url) => {
     try {
       const response = await fetch(`/image?url=${src}`);
       if (response.ok) {
-        const imagePath = await response.text();
+        const imageName = await response.text();
         const img = Object.assign(document.createElement('img'), {
-          src: '/' + imagePath,
+          src: '/images/' + imageName,
         });
         contentElement.appendChild(img);
         return img;

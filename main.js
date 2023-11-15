@@ -37,10 +37,9 @@ const server = http.createServer(async (req, res) => {
 
       const buffer = Buffer.from(await response.arrayBuffer());
       const fileName = `image_${Date.now()}.jpg`;
-      const filePath = `./images/${fileName}`;
 
-      await fs.writeFile(filePath, buffer);
-      return filePath;
+      await fs.writeFile(fileName, buffer);
+      return fileName;
     } catch (error) {
       console.error('Error downloading image:', error);
       throw error;
@@ -68,11 +67,13 @@ const server = http.createServer(async (req, res) => {
     const filePath = path.join(__dirname, req.url);
     try {
       console.log('filepath', filePath)
-      const fileContent = await fs.readFile(filePath);
+      const basename = path.basename(filePath);
+      console.log('basename', basename)
+      const fileContent = await fs.readFile(basename);
       const contentType = 'image/jpg';
       res.writeHead(200, { 'Content-Type': contentType });
       res.end(fileContent);
-      await fs.unlink(filePath);
+      await fs.unlink(basename);
     } catch (error) {
       res.writeHead(500, { 'Content-Type': 'text/plain' });
       res.end('Internal Server Error');
@@ -83,6 +84,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(process.env.PORT || 3000, async () => {
-  await fs.mkdir(path.join(__dirname, 'images'), { recursive: true });
   console.log('Server is up.');
 });
