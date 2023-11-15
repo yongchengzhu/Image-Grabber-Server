@@ -66,9 +66,7 @@ const server = http.createServer(async (req, res) => {
   } else if (req.url.startsWith('/images/')) {
     const filePath = path.join(__dirname, req.url);
     try {
-      console.log('filepath', filePath)
       const basename = path.basename(filePath);
-      console.log('basename', basename)
       const fileContent = await fs.readFile(basename);
       const contentType = 'image/jpg';
       res.writeHead(200, { 'Content-Type': contentType });

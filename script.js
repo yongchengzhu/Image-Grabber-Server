@@ -23,7 +23,6 @@ const handleNavigation = path => {
 };
 
 const fetchTextContents = async (url, className) => {
-  console.log('Inside of fetchTextContents');
   const contentElement = document.querySelector('.content');
   contentElement.innerHTML = '';
   const html = await (await fetch(`/search?url=${url}`)).text();
@@ -41,21 +40,16 @@ window.addEventListener('popstate', () => {
 const getImages = async (url) => {
   const contentElement = document.querySelector('.content');
   contentElement.innerHTML = '';
-
   const html = await (await fetch(`/search?url=${url}`)).text();
-
   document.querySelector('.content').appendChild(Object.assign(document.createElement('h1'), { textContent: (new DOMParser().parseFromString(html, 'text/html').querySelector('h1') || {}).textContent }));
-
   const createButton = (className, textContent, href) => {
     const button = contentElement.appendChild(Object.assign(document.createElement('button'), { textContent, className }));
     button.onclick = () => navigateTo(href);
   };
-
   const addButton = (className, textContent, regex) => {
     const match = html.match(regex);
     match && createButton(className, textContent, new URL(match[1]).pathname);
   };
-
   const createImg = async (src) => {
     try {
       const response = await fetch(`/image?url=${src}`);
@@ -71,16 +65,10 @@ const getImages = async (url) => {
       console.error(`Error fetching image: ${src}`, error);
     }
   };
-
   const matches = Array.from(html.matchAll(/<img[^>]+src="([^"]+)"[^>]*>/g));
-
-  // Map each image to a function that returns a promise
   const imagePromises = matches.map(({ 1: image }) => () => createImg(image));
-
   addButton('navi-change-chapter-btn-prev', 'Previous Chapter', /<a[^>]+class="[^"]*navi-change-chapter-btn-prev[^"]*"[^>]*href="([^"]+)"[^>]*>/);
   addButton('navi-change-chapter-btn-next', 'Next Chapter', /<a[^>]+class="[^"]*navi-change-chapter-btn-next[^"]*"[^>]*href="([^"]+)"[^>]*>/);
-
-  // Execute promises sequentially
   for (const promiseFn of imagePromises) {
     const startPerformance = performance.now();
     await promiseFn();
@@ -88,7 +76,6 @@ const getImages = async (url) => {
     const executionTimePerformance = endPerformance - startPerformance;
     console.log(`Execution time: ${executionTimePerformance} milliseconds`);
   }
-
   addButton('navi-change-chapter-btn-prev', 'Previous Chapter', /<a[^>]+class="[^"]*navi-change-chapter-btn-prev[^"]*"[^>]*href="([^"]+)"[^>]*>/);
   addButton('navi-change-chapter-btn-next', 'Next Chapter', /<a[^>]+class="[^"]*navi-change-chapter-btn-next[^"]*"[^>]*href="([^"]+)"[^>]*>/);
 };
