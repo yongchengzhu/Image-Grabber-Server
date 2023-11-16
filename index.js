@@ -2,8 +2,7 @@ const http = require('http');
 const url = require('url');
 const path = require('path');
 
-const { sendFile, downloadImage } = require('./utils/file');
-const { fetchHTML } = require('./utils/scrape');
+const { sendFile, downloadImage, fetchHTML } = require('./utils/browse');
 
 const server = http.createServer(async (req, res) => {
   switch (true) {
