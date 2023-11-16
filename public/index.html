@@ -7,9 +7,11 @@
   <title>Image Yoinker</title>
 </head>
 <body>
-  <label for="textBox">Search:</label>
-  <input type="text" id="textBox">
-  <button onclick="search()">Submit</button>
+  <form onsubmit="search(); return false;">
+    <label for="textBox">Search:</label>
+    <input type="text" id="textBox">
+    <input type="submit" value="Submit">
+  </form>
   <div class="content"></div>
 
   <script src="/script.js"></script>
