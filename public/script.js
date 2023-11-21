@@ -2,6 +2,15 @@ const BASE_URL = "https://chapmanganato.com"
 
 const search = async () => navigateTo(`/search/story/${document.getElementById('textBox').value.replaceAll(' ', '_')}`);
 
+const decodeJWT = token =>
+  JSON.parse(decodeURIComponent(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+
+
+function handleCredentialResponse({ credential }) {
+  const credentials = decodeJWT(credential);
+  console.log(credentials);
+}
+
 const navigateTo = path => {
   history.pushState(null, null, path);
   handleNavigation(path);

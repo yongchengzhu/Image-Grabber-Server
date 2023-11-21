@@ -3,17 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-signin-client_id" content="509969422105-tnafbs9ucbs51fgk7mjel4jbj367co3e.apps.googleusercontent.com">
   <link rel="stylesheet" href="/style.css">
   <title>Image Yoinker</title>
 </head>
 <body>
+  <nav>
+    <div id="g_id_onload" data-client_id="509969422105-tnafbs9ucbs51fgk7mjel4jbj367co3e.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
+    <div class="g_id_signin" data-type="standard"></div>
+  </nav>
   <form onsubmit="search(); return false;">
     <label for="textBox">Search:</label>
     <input type="text" id="textBox">
     <input type="submit" value="Submit">
   </form>
-  <!-- <div class="content"></div> -->
-
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="/script.js"></script>
 </body>
 </html>

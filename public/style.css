@@ -6,6 +6,16 @@ body, form {
   justify-content: center;
 }
 
+form {
+  margin-top: 50px;
+}
+
+nav {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
 label, input, button {
   font-size: 1.5em;
   margin-bottom: 10px;
