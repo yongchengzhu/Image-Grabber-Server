@@ -1,15 +1,39 @@
-const BASE_URL = "https://chapmanganato.com"
-
-const search = async () => navigateTo(`/search/story/${document.getElementById('textBox').value.replaceAll(' ', '_')}`);
-
+// OAUTH. TODO: Separate these into a different file.
 const decodeJWT = token =>
   JSON.parse(decodeURIComponent(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
 
-
 function handleCredentialResponse({ credential }) {
-  const credentials = decodeJWT(credential);
-  console.log(credentials);
+  localStorage.setItem('credential', credential);
+  navigateTo(window.location.pathname);
 }
+
+const isSignedIn = () => {
+  const credential = localStorage.getItem('credential');
+  if (!credential)
+    return false;
+  const { exp, given_name } = decodeJWT(credential);
+  console.log(decodeJWT(credential));
+  const result = exp > Date.now() / 1000;
+  if (result) {
+    document.querySelector('.g_id_signin').hidden = true;
+    document.querySelector('nav').appendChild(Object.assign(document.createElement('h2'), { textContent: `Hi, ${given_name}`, className: "signout" }));
+    document.querySelector('nav').appendChild(Object.assign(document.createElement('button'), { textContent: "Sign Out", className: "signout" })).onclick = handleSignOut;
+  } else {
+    handleSignOut();
+  }
+  return result;
+}
+
+const handleSignOut = () => {
+  localStorage.removeItem('credential');
+  document.querySelectorAll('.signout').forEach(node => node.remove());
+  document.querySelector('.g_id_signin').hidden = false;
+}
+
+// Main Code
+const BASE_URL = "https://chapmanganato.com"
+
+const search = async () => navigateTo(`/search/story/${document.getElementById('textBox').value.replaceAll(' ', '_')}`);
 
 const navigateTo = path => {
   history.pushState(null, null, path);
@@ -17,6 +41,7 @@ const navigateTo = path => {
 };
 
 const handleNavigation = path => {
+  console.log(isSignedIn());
   document.querySelector('.content') && document.querySelector('.content').remove();
   const content = Object.assign(document.createElement('div'), { className: "content" });
   document.body.appendChild(content);

@@ -14,11 +14,16 @@ nav {
   width: 100%;
   display: flex;
   justify-content: flex-end;
+  align-items: baseline;
 }
 
-label, input, button {
+label, input, .signout {
   font-size: 1.5em;
   margin-bottom: 10px;
+}
+
+h2.signout {
+  margin-right: 10px;
 }
 
 .content {
