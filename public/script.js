@@ -76,10 +76,15 @@ const fetchTextContents = async (url, className, content) => {
 
 const getImages = async (url, content) => {
   const html = new DOMParser().parseFromString(await (await fetch(`/search?url=${url}`)).text(), 'text/html');
-  const addButtons = () => [html.querySelector('.navi-change-chapter-btn-prev'), html.querySelector('.navi-change-chapter-btn-next')]
-    .filter(Boolean)
-    .forEach(({ textContent, href }) => content.appendChild(Object.assign(document.createElement('button'), { textContent }))
-      .onclick = () => navigateTo(new URL(href).pathname));
+  const addButtons = () => {
+    const buttonContainer = content.appendChild(Object.assign(document.createElement('div'), { className: "button-container" }));
+    [html.querySelector('.navi-change-chapter-btn-prev'), html.querySelector('.navi-change-chapter-btn-next')]
+      .filter(Boolean)
+      .forEach(({ textContent, href }) => {
+        buttonContainer.appendChild(Object.assign(document.createElement('button'), { textContent, className: "chapter-button" }))
+          .onclick = () => navigateTo(new URL(href).pathname);
+      })
+  };
   content.appendChild(Object.assign(document.createElement('h1'), { textContent: (html.querySelector('h1') || {}).textContent }));
   addButtons();
   for (const { src } of Array.from(html.querySelectorAll('img'))) {

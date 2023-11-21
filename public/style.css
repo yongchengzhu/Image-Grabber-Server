@@ -17,7 +17,7 @@ nav {
   align-items: baseline;
 }
 
-label, input, .signout {
+label, input, button {
   font-size: 1.5em;
   margin-bottom: 10px;
 }
@@ -36,6 +36,18 @@ h2.signout {
 .item-title, .chapter-name {
   margin-top: 25px;
   margin-bottom: 25px;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.chapter-button {
+  font-size: 19px;
 }
 
 img {
