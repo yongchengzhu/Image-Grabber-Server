@@ -16,6 +16,7 @@ const isSignedIn = () => {
   const result = exp > Date.now() / 1000;
   if (result) {
     document.querySelector('.g_id_signin').hidden = true;
+    document.querySelectorAll('.signout').forEach(node => node.remove());
     document.querySelector('nav').appendChild(Object.assign(document.createElement('h2'), { textContent: `Hi, ${given_name}`, className: "signout" }));
     document.querySelector('nav').appendChild(Object.assign(document.createElement('button'), { textContent: "Sign Out", className: "signout" })).onclick = handleSignOut;
   } else {
