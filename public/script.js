@@ -78,7 +78,6 @@ const fetchTextContents = async (url, className, content) => {
   Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll(`.${className}`))
     .forEach(({ textContent, href }) => {
       const node = content.appendChild(Object.assign(document.createElement('a'), { textContent, className, href: new URL(href).pathname }));
-      // node.addEventListener('click', () => navigateTo(new URL(href).pathname));
     });
 };
 
@@ -103,7 +102,7 @@ const getImages = async (url, content) => {
         if (isSaved)
           await fetch(`/list?id=${list[0]._id}`, { method: 'DELETE' });
         else
-          await fetch(`/list`, { method: 'POST', body: JSON.stringify({ userId, title: title.title, chapter: chapter.title, url: window.location.pathname, className: "save-button" }) });
+          await fetch(`/list`, { method: 'POST', body: JSON.stringify({ userId, title: title.title, chapter: chapter.title, url: window.location.pathname }) });
         navigateTo(window.location.pathname);
       };
   }
