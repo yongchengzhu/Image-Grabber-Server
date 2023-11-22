@@ -12,18 +12,17 @@ const isSignedIn = () => {
   const credential = localStorage.getItem('credential');
   if (!credential)
     return false;
-  const { exp, given_name, email } = decodeJWT(credential);
-  const result = exp > Date.now() / 1000;
-  if (result) {
+  const { iat, given_name, email } = decodeJWT(credential);
+  if (iat + 604800 > Date.now() / 1000) {
     document.querySelector('.g_id_signin').hidden = true;
     document.querySelectorAll('.signout,.my-list').forEach(node => node.remove());
     document.querySelector('.nav-buttons').appendChild(Object.assign(document.createElement('button'), { textContent: "My List", className: "my-list" })).onclick = () => navigateTo('/mylist');
     document.querySelector('.user-info').appendChild(Object.assign(document.createElement('h2'), { textContent: `Hi, ${given_name}`, className: "signout" }));
     document.querySelector('.user-info').appendChild(Object.assign(document.createElement('button'), { textContent: "Sign Out", className: "signout" })).onclick = handleSignOut;
-  } else {
-    handleSignOut();
+    return email;
   }
-  return email;
+  handleSignOut();
+  return false;
 }
 
 const handleSignOut = () => {
