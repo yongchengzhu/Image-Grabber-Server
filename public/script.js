@@ -2,6 +2,7 @@
 const decodeJWT = token =>
   JSON.parse(decodeURIComponent(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
 
+// Doc: https://developers.google.com/identity/gsi/web/reference/js-reference#credential
 function handleCredentialResponse({ credential }) {
   localStorage.setItem('credential', credential);
   navigateTo(window.location.pathname);
@@ -11,24 +12,25 @@ const isSignedIn = () => {
   const credential = localStorage.getItem('credential');
   if (!credential)
     return false;
-  const { exp, given_name } = decodeJWT(credential);
-  console.log(decodeJWT(credential));
+  const { exp, given_name, sub } = decodeJWT(credential);
   const result = exp > Date.now() / 1000;
   if (result) {
     document.querySelector('.g_id_signin').hidden = true;
-    document.querySelectorAll('.signout').forEach(node => node.remove());
-    document.querySelector('nav').appendChild(Object.assign(document.createElement('h2'), { textContent: `Hi, ${given_name}`, className: "signout" }));
-    document.querySelector('nav').appendChild(Object.assign(document.createElement('button'), { textContent: "Sign Out", className: "signout" })).onclick = handleSignOut;
+    document.querySelectorAll('.signout,.my-list').forEach(node => node.remove());
+    document.querySelector('.nav-buttons').appendChild(Object.assign(document.createElement('button'), { textContent: "My List", className: "my-list" })).onclick = () => navigateTo('/mylist');
+    document.querySelector('.user-info').appendChild(Object.assign(document.createElement('h2'), { textContent: `Hi, ${given_name}`, className: "signout" }));
+    document.querySelector('.user-info').appendChild(Object.assign(document.createElement('button'), { textContent: "Sign Out", className: "signout" })).onclick = handleSignOut;
   } else {
     handleSignOut();
   }
-  return result;
+  return sub;
 }
 
 const handleSignOut = () => {
   localStorage.removeItem('credential');
-  document.querySelectorAll('.signout').forEach(node => node.remove());
+  document.querySelectorAll('.signout,.my-list').forEach(node => node.remove());
   document.querySelector('.g_id_signin').hidden = false;
+  navigateTo(window.location.pathname);
 }
 
 // Main Code
@@ -42,7 +44,7 @@ const navigateTo = path => {
 };
 
 const handleNavigation = path => {
-  console.log(isSignedIn());
+  const userId = isSignedIn();
   document.querySelector('.content') && document.querySelector('.content').remove();
   const content = Object.assign(document.createElement('div'), { className: "content" });
   document.body.appendChild(content);
@@ -55,6 +57,11 @@ const handleNavigation = path => {
       break;
     case path.startsWith('/manga-'):
       fetchTextContents(BASE_URL + path, 'chapter-name', content);
+      break;
+    case path.startsWith('/mylist'):
+      if (!userId)
+        navigateTo('/');
+      renderList(content);
       break;
     default:
       break;
@@ -76,7 +83,9 @@ const fetchTextContents = async (url, className, content) => {
 
 const getImages = async (url, content) => {
   const html = new DOMParser().parseFromString(await (await fetch(`/search?url=${url}`)).text(), 'text/html');
-  const addButtons = () => {
+  const [title, chapter] = Array.from(html.querySelectorAll('.a-h')).slice(1, 3);
+  const userId = isSignedIn();
+  const addChapterButtons = () => {
     const buttonContainer = content.appendChild(Object.assign(document.createElement('div'), { className: "button-container" }));
     [html.querySelector('.navi-change-chapter-btn-prev'), html.querySelector('.navi-change-chapter-btn-next')]
       .filter(Boolean)
@@ -85,8 +94,21 @@ const getImages = async (url, content) => {
           .onclick = () => navigateTo(new URL(href).pathname);
       })
   };
-  content.appendChild(Object.assign(document.createElement('h1'), { textContent: (html.querySelector('h1') || {}).textContent }));
-  addButtons();
+  if (userId) {
+    const list = await (await fetch(`/list?userId=${userId}&title=${title.title}&chapter=${chapter.title}`)).json();
+    content.appendChild(Object.assign(document.createElement('button'), { textContent: list.length > 0? 'Remove From List' : 'Save To List' }))
+      .onclick = async e => {
+        const isSaved = e.target.textContent == 'Remove From List';
+        if (isSaved)
+          await fetch(`/list?id=${list[0]._id}`, { method: 'DELETE' });
+        else
+          await fetch(`/list`, { method: 'POST', body: JSON.stringify({ userId, title: title.title, chapter: chapter.title, url: window.location.pathname, className: "save-button" }) });
+        navigateTo(window.location.pathname);
+      };
+  }
+    
+  content.appendChild(Object.assign(document.createElement('h1'), { textContent: html.querySelector('h1').textContent }));
+  addChapterButtons();
   for (const { src } of Array.from(html.querySelectorAll('img'))) {
     try {
       content.appendChild(Object.assign(document.createElement('img'), { src: `/images/${await (await fetch(`/image?url=${src}`)).text()}` }));
@@ -94,7 +116,18 @@ const getImages = async (url, content) => {
       console.error(`Error fetching image: ${src}`, error);
     }
   }
-  addButtons();
+  addChapterButtons();
 };
+
+const renderList = async content => {
+  const list = await (await fetch(`/list?userId=${isSignedIn()}`)).json();
+  content.appendChild(Object.assign(document.createElement('h1'), { textContent: "My List" }));
+  list.forEach(book => {
+    const container = Object.assign(document.createElement('div'), { className: "book-container" });
+    content.appendChild(container);
+    container.appendChild(Object.assign(document.createElement('span'), { textContent: book.title + ": " }));
+    container.appendChild(Object.assign(document.createElement('a'), { textContent: book.chapter, href: book.url }));
+  });
+}
 
 handleNavigation(document.location.pathname);
