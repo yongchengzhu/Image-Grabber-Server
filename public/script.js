@@ -12,7 +12,7 @@ const isSignedIn = () => {
   const credential = localStorage.getItem('credential');
   if (!credential)
     return false;
-  const { exp, given_name, sub } = decodeJWT(credential);
+  const { exp, given_name, email } = decodeJWT(credential);
   const result = exp > Date.now() / 1000;
   if (result) {
     document.querySelector('.g_id_signin').hidden = true;
