@@ -23,7 +23,7 @@ const isSignedIn = () => {
   } else {
     handleSignOut();
   }
-  return sub;
+  return email;
 }
 
 const handleSignOut = () => {
