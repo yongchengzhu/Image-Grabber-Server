@@ -1,4 +1,5 @@
 const fs = require('fs').promises;
+const path = require('path');
 
 const { respond } = require('./common');
 
@@ -11,7 +12,7 @@ const sendFile = async (res, path, contentType, isDelete=false) => {
   }
 };
 
-const downloadImage = async (res, url) => {
+const downloadImage = async (res, { url, userId }) => {
   try {
     const response = await fetch(url, {
       headers: {
@@ -26,7 +27,7 @@ const downloadImage = async (res, url) => {
       mode: "cors",
       credentials: "omit",
     });
-    const fileName = `image_${Date.now()}.jpg`;
+    const fileName = `${userId}_image_${Date.now()}.jpg`;
     await fs.writeFile(fileName, Buffer.from(await response.arrayBuffer()));
     respond(res, 200, 'text/plain', fileName);
   } catch (error) {
@@ -42,8 +43,20 @@ const fetchHTML = async (res, url) => {
   }
 }
 
+const deleteAllFilesWithPrefix = async (res, prefix) => {
+  try {
+    await Promise.all((await fs.readdir('./')).filter(file => file.startsWith(prefix))
+        .map(file => fs.unlink(path.join('./', file))));
+    respond(res, 200, 'text/plain', ''); 
+  } catch (error) {
+    console.log(error);
+    respond(res, 500, 'text/plain', 'Internal Server Error');
+  }
+}
+
 module.exports = {
   sendFile,
   downloadImage,
   fetchHTML,
+  deleteAllFilesWithPrefix,
 };

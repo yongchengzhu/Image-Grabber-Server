@@ -43,7 +43,7 @@ const navigateTo = path => {
   handleNavigation(path);
 };
 
-const handleNavigation = path => {
+const handleNavigation = async path => {
   const userId = isSignedIn();
   document.querySelector('.content') && document.querySelector('.content').remove();
   const content = Object.assign(document.createElement('div'), { className: "content" });
@@ -53,6 +53,7 @@ const handleNavigation = path => {
       fetchTextContents(BASE_URL + path, 'item-title', content);
       break;
     case path.startsWith('/manga-') && path.includes('/chapter-'):
+      await fetch(`/images?userId=${userId}`, { method: 'DELETE' });
       getImages(BASE_URL + path, content);
       break;
     case path.startsWith('/manga-'):
@@ -88,11 +89,11 @@ const getImages = async (url, content) => {
   const addChapterButtons = () => {
     const buttonContainer = content.appendChild(Object.assign(document.createElement('div'), { className: "button-container" }));
     [html.querySelector('.navi-change-chapter-btn-prev'), html.querySelector('.navi-change-chapter-btn-next')]
-      .filter(Boolean)
-      .forEach(({ textContent, href }) => {
-        buttonContainer.appendChild(Object.assign(document.createElement('button'), { textContent, className: "chapter-button" }))
-          .onclick = () => navigateTo(new URL(href).pathname);
-      })
+    .filter(Boolean)
+    .forEach(({ textContent, href }) => {
+      buttonContainer.appendChild(Object.assign(document.createElement('button'), { textContent, className: "chapter-button" }))
+      .onclick = () => navigateTo(new URL(href).pathname);
+    })
   };
   if (userId) {
     const list = await (await fetch(`/list?userId=${userId}&title=${title.title}&chapter=${chapter.title}`)).json();
@@ -106,12 +107,16 @@ const getImages = async (url, content) => {
         navigateTo(window.location.pathname);
       };
   }
-    
-  content.appendChild(Object.assign(document.createElement('h1'), { textContent: html.querySelector('h1').textContent }));
+  
+  const titleContainer = Object.assign(document.createElement('div'), { className: "title-container" });
+  content.appendChild(titleContainer);
+  titleContainer.appendChild(Object.assign(document.createElement('a'), { textContent: title.title, href: new URL(title.href).pathname }));
+  titleContainer.appendChild(Object.assign(document.createElement('span'), { textContent: " >> " }));
+  titleContainer.appendChild(Object.assign(document.createElement('span'), { textContent: `${chapter.title}` }));
   addChapterButtons();
   for (const { src } of Array.from(html.querySelectorAll('img'))) {
     try {
-      content.appendChild(Object.assign(document.createElement('img'), { src: `/images/${await (await fetch(`/image?url=${src}`)).text()}` }));
+      content.appendChild(Object.assign(document.createElement('img'), { src: `/images/${await (await fetch(`/image?url=${src}&userId=${userId}`)).text()}` }));
     } catch (error) {
       console.error(`Error fetching image: ${src}`, error);
     }

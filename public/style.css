@@ -44,6 +44,12 @@ label, input, button {
   margin-bottom: 25px;
 }
 
+.title-container {
+  margin: 25px 0;
+  font-size: 25px;
+  font-weight: bold;
+}
+
 .button-container {
   display: flex;
   flex-direction: row;

@@ -3,7 +3,7 @@ const http = require('http');
 const url = require('url');
 const path = require('path');
 const { MongoClient, ObjectId } = require('mongodb');
-const { sendFile, downloadImage, fetchHTML } = require('./utils/browse');
+const { sendFile, downloadImage, fetchHTML, deleteAllFilesWithPrefix } = require('./utils/browse');
 
 const mongoURI = process.env.MONGO_URI;
 let db;
@@ -104,7 +104,6 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(lists));
       break;
-    break;
     case req.method === 'DELETE' && req.url.startsWith('/list?id='):
       const idToDelete = url.parse(req.url, true).query.id;
       console.log(idToDelete);
@@ -122,10 +121,13 @@ const server = http.createServer(async (req, res) => {
       await fetchHTML(res, url.parse(req.url, true).query.url);
       break;
     case req.url.startsWith('/image?url='):
-      await downloadImage(res, url.parse(req.url, true).query.url);
+      await downloadImage(res, url.parse(req.url, true).query);
       break;
-    case req.url.startsWith('/images/'):
+    case req.method === 'GET' && req.url.startsWith('/images/'):
       await sendFile(res, path.basename(path.join(__dirname, req.url)), 'image/jpg', true);
+      break;
+    case req.method === 'DELETE' && req.url.startsWith('/images?userId='):
+      await deleteAllFilesWithPrefix(res, url.parse(req.url, true).query.userId);
       break;
     default:
       await sendFile(res, 'public/index.html', 'text/html');
