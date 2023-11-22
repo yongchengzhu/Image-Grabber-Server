@@ -77,8 +77,8 @@ const fetchTextContents = async (url, className, content) => {
   const html = await (await fetch(`/search?url=${url}`)).text();
   Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll(`.${className}`))
     .forEach(({ textContent, href }) => {
-      const node = content.appendChild(Object.assign(document.createElement('div'), { textContent, className }));
-      node.addEventListener('click', () => navigateTo(new URL(href).pathname));
+      const node = content.appendChild(Object.assign(document.createElement('a'), { textContent, className, href: new URL(href).pathname }));
+      // node.addEventListener('click', () => navigateTo(new URL(href).pathname));
     });
 };
 
