@@ -119,9 +119,7 @@ const getImages = async (url, content) => {
   }
   const promises = Array.from(content.querySelectorAll('img')).map(img => {
     return new Promise(async (resolve) => {
-      // console.log('image data:');
-      // console.log(img.data);
-      fetch(`/images/${await (await fetch(`/image?url=${img.data}&userId=${userId}`)).text()}`)
+      fetch(`/images/${await (await fetch(`/image?url=${img.data}&userId=${userId}`, { timeout: 100000000, })).text()}`, { timeout: 100000000, })
         .then(response => response.body)
         .then(rs => {
           const reader = rs.getReader();
@@ -150,35 +148,6 @@ const getImages = async (url, content) => {
     });
   });
   await Promise.all(promises);
-  // for (const { src } of Array.from(html.querySelectorAll('img'))) {
-  //   const image = document.createElement('img');
-  //   content.appendChild(image);
-  //   fetch(`/images/${await (await fetch(`/image?url=${src}&userId=${userId}`)).text()}`)
-  //     .then(response => response.body)
-  //     .then(rs => {
-  //       const reader = rs.getReader();
-  //       return new ReadableStream({
-  //         async start(controller) {
-  //           while (true) {
-  //             const { done, value } = await reader.read();
-  //             if (done)
-  //               break;
-  //             controller.enqueue(value);
-  //           }
-  //           controller.close();
-  //           reader.releaseLock();
-  //         }
-  //       });
-  //     })
-  //     .then(rs => new Response(rs))
-  //     .then(response => response.blob())
-  //     .then(blob => URL.createObjectURL(blob))
-  //     .then(async url => {
-  //       image.src = url;
-  //       await fetch(`/images?userId=${userId}`, { method: 'DELETE' });
-  //     })
-  //     .catch(console.error);
-  // }
   addChapterButtons();
 };
 
