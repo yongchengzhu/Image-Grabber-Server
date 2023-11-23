@@ -117,9 +117,9 @@ const getImages = async (url, content) => {
     image.src = 'https://placehold.co/386x567';
     content.appendChild(image);
   }
-  const promises = Array.from(content.querySelectorAll('img')).map(img => {
+  const promises = Array.from(content.querySelectorAll('img')).map((img, index) => {
     return new Promise(async (resolve) => {
-      fetch(`/images/${await (await fetch(`/image?url=${img.data}&userId=${userId}`, { timeout: 100000000, })).text()}`, { timeout: 100000000, })
+      fetch(`/images/${await (await fetch(`/image?url=${img.data}&userId=${userId}&index=${index}`, { timeout: 100000000, })).text()}`, { timeout: 100000000, })
         .then(response => response.body)
         .then(rs => {
           const reader = rs.getReader();
@@ -141,7 +141,7 @@ const getImages = async (url, content) => {
         .then(blob => URL.createObjectURL(blob))
         .then(async url => {
           img.src = url;
-          // await fetch(`/images?userId=${userId}`, { method: 'DELETE' });
+          await fetch(`/image?userId=${userId}&page=${index}`, { method: 'DELETE' });
           resolve();
         })
         .catch(console.error);

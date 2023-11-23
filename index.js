@@ -3,7 +3,7 @@ const http = require('http');
 const url = require('url');
 const path = require('path');
 const { MongoClient, ObjectId } = require('mongodb');
-const { sendFile, sendImage, downloadImage, fetchHTML, deleteAllFilesWithPrefix } = require('./utils/browse');
+const { sendFile, sendImage, downloadImage, fetchHTML, deleteAllFilesWithPrefix, deleteFile } = require('./utils/browse');
 
 const mongoURI = process.env.MONGO_URI;
 let db;
@@ -128,6 +128,9 @@ const server = http.createServer(async (req, res) => {
       break;
     case req.method === 'DELETE' && req.url.startsWith('/images?userId='):
       await deleteAllFilesWithPrefix(res, url.parse(req.url, true).query.userId);
+      break;
+    case req.method === 'DELETE' && req.url.startsWith('/image?userId='):
+      await deleteFile(res, url.parse(req.url, true).query);
       break;
     default:
       await sendFile(res, 'public/index.html', 'text/html');

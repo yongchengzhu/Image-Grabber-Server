@@ -12,10 +12,23 @@ const sendFile = async (res, path, contentType, isDelete=false) => {
   }
 };
 
-const sendImage = (res, path) => {
+const sendImage = (res, filePath) => {
   try {
-    console.log('path', path);
-    const imageStream = require('fs').createReadStream(path);
+    if (!require('fs').existsSync(filePath)){
+      respond(res, 200, 'text/plain', '');
+      return;
+    }
+    const imageStream = require('fs').createReadStream(filePath);
+    imageStream.on('error', (error) => {
+      if (error.code === 'ENOENT') {
+        // File not found, respond accordingly
+        respond(res, 404, 'text/plain', 'File not found');
+      } else {
+        // Other errors, log and respond with a 500 status
+        console.error(error);
+        respond(res, 500, 'text/plain', 'Internal Server Error');
+      }
+    });
     res.setHeader('Content-Type', 'image/png');
     imageStream.pipe(res);
   } catch (error) {
@@ -24,7 +37,7 @@ const sendImage = (res, path) => {
   }
 }
 
-const downloadImage = async (res, { url, userId }) => {
+const downloadImage = async (res, { url, userId, index }) => {
   try {
     const response = await fetch(url, {
       headers: {
@@ -40,7 +53,7 @@ const downloadImage = async (res, { url, userId }) => {
       credentials: "omit",
       timeout: 100000000,
     });
-    const fileName = `${userId}_image_${Date.now()}.jpg`;
+    const fileName = `${userId}_image_${index}.jpg`;
     await fs.writeFile(fileName, Buffer.from(await response.arrayBuffer()));
     respond(res, 200, 'text/plain', fileName);
   } catch (error) {
@@ -68,10 +81,23 @@ const deleteAllFilesWithPrefix = async (res, prefix) => {
   }
 }
 
+const deleteFile = async (res, { userId, page }) => {
+  try {
+    const filePath = path.join('./', `${userId}_image_${page}.jpg`);
+    if (require('fs').existsSync(filePath))
+      fs.unlink(filePath);
+    respond(res, 200, 'text/plain', ''); 
+  } catch (error) {
+    console.log(error);
+    respond(res, 500, 'text/plain', 'Internal Server Error');
+  }
+}
+
 module.exports = {
   sendFile,
   sendImage,
   downloadImage,
   fetchHTML,
   deleteAllFilesWithPrefix,
+  deleteFile,
 };
