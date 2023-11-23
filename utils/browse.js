@@ -38,6 +38,7 @@ const downloadImage = async (res, { url, userId }) => {
       method: "GET",
       mode: "cors",
       credentials: "omit",
+      timeout: 900000
     });
     const fileName = `${userId}_image_${Date.now()}.jpg`;
     await fs.writeFile(fileName, Buffer.from(await response.arrayBuffer()));
