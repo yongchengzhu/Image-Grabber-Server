@@ -12,6 +12,12 @@ const sendFile = async (res, path, contentType, isDelete=false) => {
   }
 };
 
+const sendImage = (res, path) => {
+  const imageStream = require('fs').createReadStream(path);
+  res.setHeader('Content-Type', 'image/png');
+  imageStream.pipe(res);
+}
+
 const downloadImage = async (res, { url, userId }) => {
   try {
     const response = await fetch(url, {
@@ -56,6 +62,7 @@ const deleteAllFilesWithPrefix = async (res, prefix) => {
 
 module.exports = {
   sendFile,
+  sendImage,
   downloadImage,
   fetchHTML,
   deleteAllFilesWithPrefix,
