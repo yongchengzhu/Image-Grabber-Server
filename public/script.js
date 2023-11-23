@@ -118,6 +118,7 @@ const getImages = async (url, content) => {
     content.appendChild(image);
   }
   const promises = Array.from(content.querySelectorAll('img')).map((img, index) => {
+    console.log('index', index);
     return new Promise(async (resolve) => {
       fetch(`/images/${await (await fetch(`/image?url=${img.data}&userId=${userId}&index=${index}`, { timeout: 100000000, })).text()}`, { timeout: 100000000, })
         .then(response => response.body)
