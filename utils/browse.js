@@ -43,6 +43,7 @@ const downloadImage = async (res, { url, userId }) => {
     await fs.writeFile(fileName, Buffer.from(await response.arrayBuffer()));
     respond(res, 200, 'text/plain', fileName);
   } catch (error) {
+    console.log("Failed to download image", error);
     respond(res, 500, 'text/plain', 'Internal Server Error');
   }
 };
