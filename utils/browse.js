@@ -13,9 +13,15 @@ const sendFile = async (res, path, contentType, isDelete=false) => {
 };
 
 const sendImage = (res, path) => {
-  const imageStream = require('fs').createReadStream(path);
-  res.setHeader('Content-Type', 'image/png');
-  imageStream.pipe(res);
+  try {
+    console.log('path', path);
+    const imageStream = require('fs').createReadStream(path);
+    res.setHeader('Content-Type', 'image/png');
+    imageStream.pipe(res);
+  } catch (error) {
+    console.log(error);
+    respond(res, 500, 'text/plain', 'Internal Server Error');
+  }
 }
 
 const downloadImage = async (res, { url, userId }) => {

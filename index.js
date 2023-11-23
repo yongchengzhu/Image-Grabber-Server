@@ -125,7 +125,6 @@ const server = http.createServer(async (req, res) => {
       break;
     case req.method === 'GET' && req.url.startsWith('/images/'):
       sendImage(res, path.basename(path.join(__dirname, req.url)));
-      // await sendFile(res, path.basename(path.join(__dirname, req.url)), 'image/jpg', true);
       break;
     case req.method === 'DELETE' && req.url.startsWith('/images?userId='):
       await deleteAllFilesWithPrefix(res, url.parse(req.url, true).query.userId);
