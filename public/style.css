@@ -67,6 +67,12 @@ img {
   height: auto;
 }
 
-.book-container {
-  margin: 10px 0;
+table {
+  margin: 15px 0;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
 }

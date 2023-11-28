@@ -154,12 +154,28 @@ const getImages = async (url, content) => {
 
 const renderList = async content => {
   const list = await (await fetch(`/list?userId=${isSignedIn()}`)).json();
-  content.appendChild(Object.assign(document.createElement('h1'), { textContent: "My List" }));
-  list.forEach(book => {
-    const container = Object.assign(document.createElement('div'), { className: "book-container" });
-    content.appendChild(container);
-    container.appendChild(Object.assign(document.createElement('span'), { textContent: book.title + ": " }));
-    container.appendChild(Object.assign(document.createElement('a'), { textContent: book.chapter, href: book.url }));
+  
+  const table = Object.assign(document.createElement('table'));
+  content.appendChild(table);
+  const header = document.createElement('tr');
+  header.appendChild(Object.assign(document.createElement('th'), { textContent: 'Title' }))
+  header.appendChild(Object.assign(document.createElement('th'), { textContent: 'Last Read' }))
+  header.appendChild(Object.assign(document.createElement('th'), { textContent: 'Newest Chapter' }))
+  table.appendChild(header);
+  list.forEach(async book => {
+    console.log('bookurl', `/search?url=/${book.url.split('/')[1]}`)
+    const newestChapter = new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL}/${book.url.split('/')[1]}`)).text(), 'text/html').querySelector('.chapter-name');
+    console.log('newestChapter');
+    console.log('newestChapter', newestChapter);
+    const row = Object.assign(document.createElement('tr'));
+    const newestChapterTitle = document.createElement('td');
+    const newestChapterLink = document.createElement('td');
+    newestChapterTitle.appendChild(Object.assign(document.createElement('a'), { textContent: book.chapter, href: book.url }));
+    newestChapterLink.appendChild(document.createElement('td').appendChild(Object.assign(document.createElement('a'), { textContent: newestChapter.textContent, href: new URL(newestChapter.href).pathname })));
+    row.appendChild(Object.assign(document.createElement('td'), { textContent: book.title }));
+    row.appendChild(newestChapterTitle);
+    row.appendChild(newestChapterLink);
+    table.appendChild(row);
   });
 }
 
