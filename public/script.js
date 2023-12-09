@@ -168,11 +168,13 @@ const renderList = async content => {
     console.log('newestChapter');
     console.log('newestChapter', newestChapter);
     const row = Object.assign(document.createElement('tr'));
+    const bookTitle = document.createElement('td');
     const newestChapterTitle = document.createElement('td');
     const newestChapterLink = document.createElement('td');
+    bookTitle.appendChild(Object.assign(document.createElement('a'), { textContent: book.title, href: new URL(newestChapter.href).pathname.split('/')[1]  }))
     newestChapterTitle.appendChild(Object.assign(document.createElement('a'), { textContent: book.chapter, href: book.url }));
     newestChapterLink.appendChild(document.createElement('td').appendChild(Object.assign(document.createElement('a'), { textContent: newestChapter.textContent, href: new URL(newestChapter.href).pathname })));
-    row.appendChild(Object.assign(document.createElement('td'), { textContent: book.title }));
+    row.appendChild(bookTitle);
     row.appendChild(newestChapterTitle);
     row.appendChild(newestChapterLink);
     table.appendChild(row);
