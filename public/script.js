@@ -165,7 +165,7 @@ const renderList = async content => {
   table.appendChild(header);
   list.forEach(async book => {
     console.log('bookurl', `/search?url=/${book.url.split('/')[1]}`)
-    const newestChapter = new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL}/${book.url.split('/')[1]}`)).text(), 'text/html').querySelector('.chapter-name');
+    const newestChapter = new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL_1}/${book.url.split('/')[1]}`)).text(), 'text/html').querySelector('.chapter-name');
     console.log('newestChapter');
     console.log('newestChapter', newestChapter);
     const row = Object.assign(document.createElement('tr'));
