@@ -33,7 +33,8 @@ const handleSignOut = () => {
 }
 
 // Main Code
-const BASE_URL = "https://chapmanganato.com"
+const BASE_URL_1 = "https://chapmanganato.com"
+const BASE_URL_2 = "https://manganato.com"
 
 const search = async () => navigateTo(`/search/story/${document.getElementById('textBox').value.replaceAll(' ', '_')}`);
 
@@ -49,14 +50,14 @@ const handleNavigation = async path => {
   document.body.appendChild(content);
   switch (true) {
     case path.startsWith('/search/story/'):
-      fetchTextContents(BASE_URL + path, 'item-title', content);
+      fetchTextContents(BASE_URL_2 + path, 'item-title', content);
       break;
     case path.startsWith('/manga-') && path.includes('/chapter-'):
       await fetch(`/images?userId=${userId}`, { method: 'DELETE' });
-      getImages(BASE_URL + path, content);
+      getImages(BASE_URL_1 + path, content);
       break;
     case path.startsWith('/manga-'):
-      fetchTextContents(BASE_URL + path, 'chapter-name', content);
+      fetchTextContents(BASE_URL_1 + path, 'chapter-name', content);
       break;
     case path.startsWith('/mylist'):
       if (!userId)
