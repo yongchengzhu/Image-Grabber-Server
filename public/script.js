@@ -175,15 +175,15 @@ const renderList = async content => {
   header.appendChild(Object.assign(document.createElement('th'), { textContent: 'Newest Chapter' }))
   table.appendChild(header);
   list.forEach(async book => {
-    console.log('bookurl', `/search?url=/${book.url.split('/')[1]}`)
+    const html = new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL_1 + book.url.split("/").slice(0, -1).join('/')}`)).text(), 'text/html');
+    const image = html.querySelector(".info-image>img");
     const newestChapter = new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL_1}/${book.url.split('/')[1]}`)).text(), 'text/html').querySelector('.chapter-name');
-    console.log('newestChapter');
-    console.log('newestChapter', newestChapter);
     const row = Object.assign(document.createElement('tr'));
     const bookTitle = document.createElement('td');
     const newestChapterTitle = document.createElement('td');
     const newestChapterLink = document.createElement('td');
-    bookTitle.appendChild(Object.assign(document.createElement('a'), { textContent: book.title, href: new URL(newestChapter.href).pathname.split('/')[1]  }))
+    bookTitle.appendChild(Object.assign(document.createElement('a'), { textContent: book.title, href: new URL(newestChapter.href).pathname.split('/')[1]  }));
+    bookTitle.appendChild(Object.assign(document.createElement('img'), { src: image? image.src : "", style: "margin:auto;display:block" }));
     newestChapterTitle.appendChild(Object.assign(document.createElement('a'), { textContent: book.chapter, href: book.url }));
     newestChapterLink.appendChild(document.createElement('td').appendChild(Object.assign(document.createElement('a'), { textContent: newestChapter.textContent, href: new URL(newestChapter.href).pathname })));
     row.appendChild(bookTitle);
