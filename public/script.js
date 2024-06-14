@@ -50,7 +50,7 @@ const handleNavigation = async path => {
   document.body.appendChild(content);
   switch (true) {
     case path.startsWith('/search/story/'):
-      fetchTextContents(BASE_URL_2 + path, 'item-title', content);
+      fetchBooks(BASE_URL_2 + path, 'search-story-item', content);
       break;
     case path.startsWith('/manga-') && path.includes('/chapter-'):
       await fetch(`/images?userId=${userId}`, { method: 'DELETE' });
@@ -77,7 +77,18 @@ const fetchTextContents = async (url, className, content) => {
   const html = await (await fetch(`/search?url=${url}`)).text();
   Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll(`.${className}`))
     .forEach(({ textContent, href }) => {
-      const node = content.appendChild(Object.assign(document.createElement('a'), { textContent, className, href: new URL(href).pathname }));
+      content.appendChild(Object.assign(document.createElement('a'), { textContent, className, href: new URL(href).pathname }));
+    });
+};
+
+const fetchBooks = async (url, className, content) => {
+  const html = await (await fetch(`/search?url=${url}`)).text();
+  Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll(`.${className}`))
+    .forEach((book) => {
+      const { textContent, href } = book.querySelector('.item-title');
+      const { src } = book.querySelector('img');
+      content.appendChild(Object.assign(document.createElement('a'), { textContent, className, href: new URL(href).pathname }))
+      content.appendChild(Object.assign(document.createElement('img'), { src }));
     });
 };
 
