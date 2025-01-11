@@ -1,3 +1,40 @@
+const BASE_URL_1 = "https://chapmanganato.com"
+const BASE_URL_2 = "https://manganato.com"
+
+// Recent Updates Modal logic
+document.querySelector('.nav-buttons').appendChild(Object.assign(document.createElement('button'), { textContent: "See Recent Updates", className: "open-recent-books-modal" })).onclick = async e => {
+  const recentBooksUpdateModal = document.querySelector('#recent-books-modal');
+  recentBooksUpdateModal.style.display = "flex";
+  recentBooksUpdateModal.style.flexDirection = "column";
+  const html = await (await fetch(`/search?url=${BASE_URL_2}`)).text();
+  Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll(`.content-homepage-item`))
+    .forEach(async recentBook => {
+      const { textContent, href } = recentBook.querySelector('.item-title > a');
+      const html = await (await fetch(`/search?url=${href}`)).text();
+      const genres = Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll('.table-value > [href*="genre"]')).map(genre => genre.textContent);
+      console.log(genres)
+      const src = recentBook.querySelector('img').src;
+      const chapterInformation = recentBook.querySelectorAll('.item-chapter > a');
+      const recentBooksContainer = recentBooksUpdateModal.querySelector('#recent-books-modal-content')
+        .appendChild(Object.assign(document.createElement('div'), { className: "recent-books-container" }));
+      recentBooksContainer.appendChild(Object.assign(document.createElement('img'), { src, className: "recent-books-cover-image" }));
+      const recentBookInformation = recentBooksContainer.appendChild(Object.assign(document.createElement('div'), { src, className: "recent-books-information" }));
+      recentBookInformation.appendChild(Object.assign(document.createElement('a'), { textContent, className: "recent-books-title", href: new URL(href).pathname }))
+      recentBookInformation.appendChild(Object.assign(document.createElement('div'), { textContent: `Genres: ${genres.join(", ")}`, className: "recent-books-genre" }))
+      chapterInformation.forEach(({ textContent, href }) =>
+        recentBookInformation.appendChild(Object.assign(document.createElement('a'), { textContent, className: "recent-books-chapter", href: new URL(href).pathname }))
+      )
+    });
+}
+document.querySelector('#close-recent-books-modal').onclick = () => {
+  document.querySelector('#recent-books-modal').style.display = 'none';
+  document.querySelector('#recent-books-modal-content').textContent = '';
+}
+window.onclick = e => {
+  if (e.target.id !== 'recent-books-modal' && !e.target.classList.contains('open-recent-books-modal'))
+    document.querySelector('#recent-books-modal').style.display = 'none';
+}
+
 // OAUTH. TODO: Separate these into a different file.
 const decodeJWT = token =>
   JSON.parse(decodeURIComponent(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
@@ -33,9 +70,6 @@ const handleSignOut = () => {
 }
 
 // Main Code
-const BASE_URL_1 = "https://chapmanganato.com"
-const BASE_URL_2 = "https://manganato.com"
-
 const search = async () => navigateTo(`/search/story/${document.getElementById('textBox').value.replaceAll(' ', '_')}`);
 
 const navigateTo = path => {

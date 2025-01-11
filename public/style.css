@@ -6,6 +6,46 @@ body, form {
   justify-content: center;
 }
 
+#recent-books-modal {
+  display: none;
+  position: absolute;
+  width: 90%;
+  height: 90%;
+  border: 1px solid black;
+  background: white;
+  top: 5%;
+  left: 5%;
+  overflow: auto;
+}
+
+#close-recent-books-modal {
+  position: fixed;
+  background: red;
+  color: white;
+  border: none;
+}
+
+.recent-books-container {
+  display: flex;
+}
+
+.recent-books-title {
+  display: block;
+}
+
+.recent-books-chapter {
+  display: block;
+}
+
+.recent-books-cover-image {
+  display: block;
+}
+
+#recent-books-modal-nav-buttons {
+  display: flex;
+  justify-content: flex-end;
+}
+
 form {
   margin-top: 50px;
 }
