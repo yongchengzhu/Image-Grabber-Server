@@ -1,5 +1,5 @@
-const BASE_URL_1 = "https://chapmanganato.com"
-const BASE_URL_2 = "https://manganato.com"
+const BASE_URL_1 = "https://natomanga.com"
+const BASE_URL_2 = "https://natomanga.com"
 
 // Recent Updates Modal logic
 document.querySelector('.nav-buttons').appendChild(Object.assign(document.createElement('button'), { textContent: "See Recent Updates", className: "open-recent-books-modal" })).onclick = async e => {
@@ -84,14 +84,17 @@ const handleNavigation = async path => {
   document.body.appendChild(content);
   switch (true) {
     case path.startsWith('/search/story/'):
-      fetchBooks(BASE_URL_2 + path, 'search-story-item', content);
+      console.log("in search sotry")
+      fetchBooks(BASE_URL_2 + path, 'story_item', content);
       break;
-    case path.startsWith('/manga-') && path.includes('/chapter-'):
+    case path.startsWith('/manga') && path.includes('/chapter'):
+      console.log("in manga chapter images")
       await fetch(`/images?userId=${userId}`, { method: 'DELETE' });
       getImages(BASE_URL_1 + path, content);
       break;
-    case path.startsWith('/manga-'):
-      fetchTextContents(BASE_URL_1 + path, 'chapter-name', content);
+    case path.startsWith('/manga'):
+      console.log('in manga chapter list')
+      fetchTextContents(BASE_URL_1 + path, 'chapter-list > .row > span > a', content);
       break;
     case path.startsWith('/mylist'):
       if (!userId)
@@ -119,8 +122,9 @@ const fetchBooks = async (url, className, content) => {
   const html = await (await fetch(`/search?url=${url}`)).text();
   Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll(`.${className}`))
     .forEach((book) => {
-      const { textContent, href } = book.querySelector('.item-title');
+      const { textContent, href } = book.querySelector('.story_name > a');
       const { src } = book.querySelector('img');
+      console.log('src = ', src)
       content.appendChild(Object.assign(document.createElement('a'), { textContent, className, href: new URL(href).pathname }))
       content.appendChild(Object.assign(document.createElement('img'), { src }));
     });
@@ -128,7 +132,8 @@ const fetchBooks = async (url, className, content) => {
 
 const getImages = async (url, content) => {
   const html = new DOMParser().parseFromString(await (await fetch(`/search?url=${url}`)).text(), 'text/html');
-  const [title, chapter] = Array.from(html.querySelectorAll('.a-h')).slice(1, 3);
+  const [title, chapter] = Array.from(html.querySelectorAll('span[itemprop="name"]')).slice(1, 3);
+  console.log('title', title)
   const userId = isSignedIn();
   const addChapterButtons = () => {
     const buttonContainer = content.appendChild(Object.assign(document.createElement('div'), { className: "button-container" }));
@@ -154,9 +159,9 @@ const getImages = async (url, content) => {
   
   const titleContainer = Object.assign(document.createElement('div'), { className: "title-container" });
   content.appendChild(titleContainer);
-  titleContainer.appendChild(Object.assign(document.createElement('a'), { textContent: title.title, href: new URL(title.href).pathname }));
+  titleContainer.appendChild(Object.assign(document.createElement('a'), { textContent: title.textContent, href: new URL(title.parentNode.href).pathname }));
   titleContainer.appendChild(Object.assign(document.createElement('span'), { textContent: " >> " }));
-  titleContainer.appendChild(Object.assign(document.createElement('span'), { textContent: `${chapter.title}` }));
+  titleContainer.appendChild(Object.assign(document.createElement('span'), { textContent: `${chapter.textContent}` }));
   addChapterButtons();
   for (const image of Array.from(html.querySelectorAll('img'))) {
     image.data = image.src;
@@ -211,7 +216,9 @@ const renderList = async content => {
   list.forEach(async book => {
     const html = new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL_1 + book.url.split("/").slice(0, -1).join('/')}`)).text(), 'text/html');
     const image = html.querySelector(".info-image>img");
-    const newestChapter = new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL_1}/${book.url.split('/')[1]}`)).text(), 'text/html').querySelector('.chapter-name');
+    console.log(`/search?url=${BASE_URL_1}/manga/${book.title.toLowerCase().replace(/\s+/g, '-')}`)
+    // console.log(new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL_1}/manga/${book.title.toLowerCase().replace(/\s+/g, '-')}}`)).text(), 'text/html').querySelector('body'))
+    const newestChapter = new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL_1}/manga/${book.title.toLowerCase().replace(/\s+/g, '-')}`)).text(), 'text/html').querySelector('.chapter-list > .row > span > a');
     const row = Object.assign(document.createElement('tr'));
     const bookTitle = document.createElement('td');
     const newestChapterTitle = document.createElement('td');

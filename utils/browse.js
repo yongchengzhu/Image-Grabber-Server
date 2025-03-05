@@ -39,19 +39,23 @@ const sendImage = (res, filePath) => {
 
 const downloadImage = async (res, { url, userId, index }) => {
   try {
+    console.log('url', url);
     const response = await fetch(url, {
-      headers: {
-        "sec-ch-ua": "\"Google Chrome\";v=\"119\", \"Chromium\";v=\"119\", \"Not?A_Brand\";v=\"24\"",
+      "headers": {
+        "accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        "accept-language": "en",
+        "priority": "i",
+        "sec-ch-ua": "\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Google Chrome\";v=\"132\"",
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": "\"macOS\"",
+        "sec-fetch-dest": "image",
+        "sec-fetch-mode": "no-cors",
+        "sec-fetch-site": "cross-site",
+        "Referer": "https://www.natomanga.com/",
+        "Referrer-Policy": "strict-origin-when-cross-origin"
       },
-      referrer: "https://chapmanganato.com/",
-      referrerPolicy: "strict-origin-when-cross-origin",
-      body: null,
-      method: "GET",
-      mode: "cors",
-      credentials: "omit",
-      timeout: 100000000,
+      "body": null,
+      "method": "GET"
     });
     const fileName = `${userId}_image_${index}.jpg`;
     await fs.writeFile(fileName, Buffer.from(await response.arrayBuffer()));
