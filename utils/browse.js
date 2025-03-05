@@ -44,7 +44,7 @@ const downloadImage = async (res, { url, userId, index }) => {
       "headers": {
         "accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
         "accept-language": "en",
-        "priority": "i",
+        "priority": "u=1, i",
         "sec-ch-ua": "\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Google Chrome\";v=\"132\"",
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": "\"macOS\"",
