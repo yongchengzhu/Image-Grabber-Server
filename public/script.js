@@ -215,7 +215,7 @@ const renderList = async content => {
   table.appendChild(header);
   list.forEach(async book => {
     const html = new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL_1 + book.url.split("/").slice(0, -1).join('/')}`)).text(), 'text/html');
-    const image = html.querySelector(".info-image>img");
+    const image = html.querySelector(".manga-info-pic>img");
     console.log(`/search?url=${BASE_URL_1}/manga/${book.title.toLowerCase().replace(/\s+/g, '-')}`)
     // console.log(new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL_1}/manga/${book.title.toLowerCase().replace(/\s+/g, '-')}}`)).text(), 'text/html').querySelector('body'))
     const newestChapter = new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL_1}/manga/${book.title.toLowerCase().replace(/\s+/g, '-')}`)).text(), 'text/html').querySelector('.chapter-list > .row > span > a');
