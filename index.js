@@ -43,7 +43,10 @@ const parseRequestBody = async (req) => {
 const saveToList = async (data) => {
   try {
     const collection = db.collection('list');
-    await collection.deleteMany({ userId: data.userId, title: data.title });
+    await collection.deleteMany({ 
+      userId: data.userId, 
+      title: new RegExp(`^${data.title}$`, 'i')
+    });
     await collection.insertOne(data);
   } catch (error) {
     console.error('Error saving/updating data to MongoDB:', error);
@@ -52,13 +55,16 @@ const saveToList = async (data) => {
 
 const getList = async (userId, title, chapter) => {
   try {
+    // console.log("userId:", userId, "title:", title, "chapter:", chapter);
     const collection = db.collection('list');
     const query = { userId };
     if (title)
-      query.title = title;
+      query.title = new RegExp(`^${title}$`, 'i');
     if (chapter)
       query.chapter = chapter;
     const lists = await collection.find(query).toArray();
+    // console.log("query:", query);
+    // console.log("lists:", lists);
     return lists;
   } catch (error) {
     console.error('Error getting lists from MongoDB:', error);

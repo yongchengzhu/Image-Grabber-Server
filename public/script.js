@@ -12,7 +12,7 @@ document.querySelector('.nav-buttons').appendChild(Object.assign(document.create
       const { textContent, href } = recentBook.querySelector('.item-title > a');
       const html = await (await fetch(`/search?url=${href}`)).text();
       const genres = Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll('.table-value > [href*="genre"]')).map(genre => genre.textContent);
-      console.log(genres)
+      // console.log(genres)
       const src = recentBook.querySelector('img').src;
       const chapterInformation = recentBook.querySelectorAll('.item-chapter > a');
       const recentBooksContainer = recentBooksUpdateModal.querySelector('#recent-books-modal-content')
@@ -124,7 +124,7 @@ const fetchBooks = async (url, className, content) => {
     .forEach((book) => {
       const { textContent, href } = book.querySelector('.story_name > a');
       const { src } = book.querySelector('img');
-      console.log('src = ', src)
+      // console.log('src = ', src)
       content.appendChild(Object.assign(document.createElement('a'), { textContent, className, href: new URL(href).pathname }))
       content.appendChild(Object.assign(document.createElement('img'), { src }));
     });
@@ -133,7 +133,7 @@ const fetchBooks = async (url, className, content) => {
 const getImages = async (url, content) => {
   const html = new DOMParser().parseFromString(await (await fetch(`/search?url=${url}`)).text(), 'text/html');
   const [title, chapter] = Array.from(html.querySelectorAll('span[itemprop="name"]')).slice(1, 3);
-  console.log('title', title)
+  // console.log('title', title)
   const userId = isSignedIn();
   const addChapterButtons = () => {
     const buttonContainer = content.appendChild(Object.assign(document.createElement('div'), { className: "button-container" }));
@@ -145,14 +145,16 @@ const getImages = async (url, content) => {
     })
   };
   if (userId) {
-    const list = await (await fetch(`/list?userId=${userId}&title=${title.title}&chapter=${chapter.title}`)).json();
+    const list = await (await fetch(`/list?userId=${userId}&title=${title.textContent}&chapter=${chapter.textContent}`)).json();
+    console.log("title", title.textContent, "chapter", chapter.textContent);
+    console.log("list", list);
     content.appendChild(Object.assign(document.createElement('button'), { textContent: list.length > 0? 'Remove From List' : 'Save To List' }))
       .onclick = async e => {
         const isSaved = e.target.textContent == 'Remove From List';
         if (isSaved)
           await fetch(`/list?id=${list[0]._id}`, { method: 'DELETE' });
         else
-          await fetch(`/list`, { method: 'POST', body: JSON.stringify({ userId, title: title.title, chapter: chapter.title, url: window.location.pathname }) });
+          await fetch(`/list`, { method: 'POST', body: JSON.stringify({ userId, title: title.textContent, chapter: chapter.textContent, url: window.location.pathname }) });
         navigateTo(window.location.pathname);
       };
   }
@@ -169,7 +171,7 @@ const getImages = async (url, content) => {
     content.appendChild(image);
   }
   const promises = Array.from(content.querySelectorAll('img')).map((img, index) => {
-    console.log('img', img.data);
+    // console.log('img', img.data);
     return new Promise(async (resolve) => {
       fetch(`/images/${await (await fetch(`/image?url=${img.data.replace('virus2hub.com', '2xstorage.com')}&userId=${userId}&index=${index}`, { timeout: 100000000, })).text()}`, { timeout: 100000000, })
         .then(response => response.body)
@@ -256,7 +258,7 @@ const renderList = async content => {
           .then(response => response.blob())
           .then(blob => URL.createObjectURL(blob))
           .then(async url => {
-            console.log("url", url);
+            // console.log("url", url);
             img.src = url;
             await fetch(`/image?userId=${userId}&page=${index}`, { method: 'DELETE' });
             resolve();
