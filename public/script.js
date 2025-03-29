@@ -206,69 +206,75 @@ const getImages = async (url, content) => {
 };
 
 const renderList = async content => {
-  const list = await (await fetch(`/list?userId=${isSignedIn()}`)).json();
-  
-  const table = Object.assign(document.createElement('table'));
-  content.appendChild(table);
-  const header = document.createElement('tr');
-  header.appendChild(Object.assign(document.createElement('th'), { textContent: 'Title' }))
-  header.appendChild(Object.assign(document.createElement('th'), { textContent: 'Last Read' }))
-  header.appendChild(Object.assign(document.createElement('th'), { textContent: 'Newest Chapter' }))
-  table.appendChild(header);
-  list.forEach(async book => {
-    const html = new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL_1 + book.url.split("/").slice(0, -1).join('/')}`)).text(), 'text/html');
-    const image = html.querySelector(".manga-info-pic>img");
-    // console.log(`/search?url=${BASE_URL_1}/manga/${book.title.toLowerCase().replace(/\s+/g, '-')}`)
-    // console.log(new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL_1}/manga/${book.title.toLowerCase().replace(/\s+/g, '-')}}`)).text(), 'text/html').querySelector('body'))
-    const newestChapter = new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL_1}/manga/${book.title.toLowerCase().replace(/\s+/g, '-')}`)).text(), 'text/html').querySelector('.chapter-list > .row > span > a');
-    const row = Object.assign(document.createElement('tr'));
-    const bookTitle = document.createElement('td');
-    const newestChapterTitle = document.createElement('td');
-    const newestChapterLink = document.createElement('td');
-    const newestChapterPath = new URL(newestChapter.href).pathname
-    bookTitle.appendChild(Object.assign(document.createElement('a'), { textContent: book.title, href: newestChapterPath.substring(0, newestChapterPath.lastIndexOf('/'))  }));
-    // bookTitle.appendChild(Object.assign(document.createElement('img'), { data: image? image.src : "", src: 'https://placehold.co/386x567', style: "margin:auto;display:block" }));
-    newestChapterTitle.appendChild(Object.assign(document.createElement('a'), { textContent: book.chapter, href: book.url }));
-    newestChapterLink.appendChild(document.createElement('td').appendChild(Object.assign(document.createElement('a'), { textContent: newestChapter.textContent, href: new URL(newestChapter.href).pathname })));
-    row.appendChild(bookTitle);
-    row.appendChild(newestChapterTitle);
-    row.appendChild(newestChapterLink);
-    table.appendChild(row);
+  await Promise.all(
+    [
+      new Promise(async (resolve) => {
+        const list = await (await fetch(`/list?userId=${isSignedIn()}`)).json();
 
-    // const promises = Array.from(content.querySelectorAll('img')).map((img, index) => {
-    //   return new Promise(async (resolve) => {
-    //     fetch(`/images/${await (await fetch(`/image?url=${img.data}&userId=${isSignedIn()}&index=${index}`, { timeout: 100000000, })).text()}`, { timeout: 100000000, })
-    //       .then(response => response.body)
-    //       .then(rs => {
-    //         const reader = rs.getReader();
-    //         return new ReadableStream({
-    //           async start(controller) {
-    //             while (true) {
-    //               const { done, value } = await reader.read();
-    //               if (done)
-    //                 break;
-    //               controller.enqueue(value);
-    //             }
-    //             controller.close();
-    //             reader.releaseLock();
-    //           }
-    //         });
-    //       })
-    //       .then(rs => new Response(rs))
-    //       .then(response => response.blob())
-    //       .then(blob => URL.createObjectURL(blob))
-    //       .then(async url => {
-    //         // console.log("url", url);
-    //         img.src = url;
-    //         await fetch(`/image?userId=${userId}&page=${index}`, { method: 'DELETE' });
-    //         resolve();
-    //       })
-    //       .catch(console.error);
-    //   });
-    // });
-    // await Promise.all(promises);
+        const table = Object.assign(document.createElement('table'));
+        content.appendChild(table);
+        const header = document.createElement('tr');
+        header.appendChild(Object.assign(document.createElement('th'), { textContent: 'Title' }))
+        header.appendChild(Object.assign(document.createElement('th'), { textContent: 'Last Read' }))
+        header.appendChild(Object.assign(document.createElement('th'), { textContent: 'Newest Chapter' }))
+        table.appendChild(header);
+
+        list.forEach(async book => {
+          const html = new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL_1 + book.url.split("/").slice(0, -1).join('/')}`)).text(), 'text/html');
+          const image = html.querySelector(".manga-info-pic>img");
+          const newestChapter = html.querySelector('.chapter-list > .row > span > a');
+          const row = Object.assign(document.createElement('tr'));
+          const bookTitle = document.createElement('td');
+          const newestChapterTitle = document.createElement('td');
+          const newestChapterLink = document.createElement('td');
+          const newestChapterPath = new URL(newestChapter.href).pathname
+          bookTitle.appendChild(Object.assign(document.createElement('a'), { textContent: book.title, href: newestChapterPath.substring(0, newestChapterPath.lastIndexOf('/'))  }));
+          bookTitle.appendChild(Object.assign(document.createElement('img'), { data: image? image.src : "", src: 'https://placehold.co/386x567', style: "margin:auto;display:block" }));
+          newestChapterTitle.appendChild(Object.assign(document.createElement('a'), { textContent: book.chapter, href: book.url }));
+          newestChapterLink.appendChild(document.createElement('td').appendChild(Object.assign(document.createElement('a'), { textContent: newestChapter.textContent, href: new URL(newestChapter.href).pathname })));
+          row.appendChild(bookTitle);
+          row.appendChild(newestChapterTitle);
+          row.appendChild(newestChapterLink);
+          table.appendChild(row);
+        });
+
+        resolve();
+      })
+    ]
+  );
+
+  const promises = Array.from(content.querySelectorAll('img')).map((img, index) => {
+    return new Promise(async (resolve) => {
+      fetch(`/images/${await (await fetch(`/image?url=${img.data}&userId=${isSignedIn()}&index=${index}`, { timeout: 100000000, })).text()}`, { timeout: 100000000, })
+        .then(response => response.body)
+        .then(rs => {
+          const reader = rs.getReader();
+          return new ReadableStream({
+            async start(controller) {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done)
+                  break;
+                controller.enqueue(value);
+              }
+              controller.close();
+              reader.releaseLock();
+            }
+          });
+        })
+        .then(rs => new Response(rs))
+        .then(response => response.blob())
+        .then(blob => URL.createObjectURL(blob))
+        .then(async url => {
+          // console.log("url", url);
+          img.src = url;
+          await fetch(`/image?userId=${userId}&page=${index}`, { method: 'DELETE' });
+          resolve();
+        })
+        .catch(console.error);
+    });
   });
-
+  await Promise.all(promises);
 
 }
 
