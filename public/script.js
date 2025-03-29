@@ -146,8 +146,8 @@ const getImages = async (url, content) => {
   };
   if (userId) {
     const list = await (await fetch(`/list?userId=${userId}&title=${title.textContent}&chapter=${chapter.textContent}`)).json();
-    console.log("title", title.textContent, "chapter", chapter.textContent);
-    console.log("list", list);
+    // console.log("title", title.textContent, "chapter", chapter.textContent)
+    // console.log("list", list);
     content.appendChild(Object.assign(document.createElement('button'), { textContent: list.length > 0? 'Remove From List' : 'Save To List' }))
       .onclick = async e => {
         const isSaved = e.target.textContent == 'Remove From List';
@@ -227,7 +227,7 @@ const renderList = async content => {
     const newestChapterLink = document.createElement('td');
     const newestChapterPath = new URL(newestChapter.href).pathname
     bookTitle.appendChild(Object.assign(document.createElement('a'), { textContent: book.title, href: newestChapterPath.substring(0, newestChapterPath.lastIndexOf('/'))  }));
-    bookTitle.appendChild(Object.assign(document.createElement('img'), { data: image? image.src : "", src: 'https://placehold.co/386x567', style: "margin:auto;display:block" }));
+    // bookTitle.appendChild(Object.assign(document.createElement('img'), { data: image? image.src : "", src: 'https://placehold.co/386x567', style: "margin:auto;display:block" }));
     newestChapterTitle.appendChild(Object.assign(document.createElement('a'), { textContent: book.chapter, href: book.url }));
     newestChapterLink.appendChild(document.createElement('td').appendChild(Object.assign(document.createElement('a'), { textContent: newestChapter.textContent, href: new URL(newestChapter.href).pathname })));
     row.appendChild(bookTitle);
@@ -235,38 +235,38 @@ const renderList = async content => {
     row.appendChild(newestChapterLink);
     table.appendChild(row);
 
-    const promises = Array.from(content.querySelectorAll('img')).map((img, index) => {
-      return new Promise(async (resolve) => {
-        fetch(`/images/${await (await fetch(`/image?url=${img.data}&userId=${isSignedIn()}&index=${index}`, { timeout: 100000000, })).text()}`, { timeout: 100000000, })
-          .then(response => response.body)
-          .then(rs => {
-            const reader = rs.getReader();
-            return new ReadableStream({
-              async start(controller) {
-                while (true) {
-                  const { done, value } = await reader.read();
-                  if (done)
-                    break;
-                  controller.enqueue(value);
-                }
-                controller.close();
-                reader.releaseLock();
-              }
-            });
-          })
-          .then(rs => new Response(rs))
-          .then(response => response.blob())
-          .then(blob => URL.createObjectURL(blob))
-          .then(async url => {
-            // console.log("url", url);
-            img.src = url;
-            await fetch(`/image?userId=${userId}&page=${index}`, { method: 'DELETE' });
-            resolve();
-          })
-          .catch(console.error);
-      });
-    });
-    await Promise.all(promises);
+    // const promises = Array.from(content.querySelectorAll('img')).map((img, index) => {
+    //   return new Promise(async (resolve) => {
+    //     fetch(`/images/${await (await fetch(`/image?url=${img.data}&userId=${isSignedIn()}&index=${index}`, { timeout: 100000000, })).text()}`, { timeout: 100000000, })
+    //       .then(response => response.body)
+    //       .then(rs => {
+    //         const reader = rs.getReader();
+    //         return new ReadableStream({
+    //           async start(controller) {
+    //             while (true) {
+    //               const { done, value } = await reader.read();
+    //               if (done)
+    //                 break;
+    //               controller.enqueue(value);
+    //             }
+    //             controller.close();
+    //             reader.releaseLock();
+    //           }
+    //         });
+    //       })
+    //       .then(rs => new Response(rs))
+    //       .then(response => response.blob())
+    //       .then(blob => URL.createObjectURL(blob))
+    //       .then(async url => {
+    //         // console.log("url", url);
+    //         img.src = url;
+    //         await fetch(`/image?userId=${userId}&page=${index}`, { method: 'DELETE' });
+    //         resolve();
+    //       })
+    //       .catch(console.error);
+    //   });
+    // });
+    // await Promise.all(promises);
   });
 
 
