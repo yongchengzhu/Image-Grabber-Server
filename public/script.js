@@ -206,42 +206,33 @@ const getImages = async (url, content) => {
 };
 
 const renderList = async content => {
-  await Promise.all(
-    [
-      new Promise(async (resolve) => {
-        const list = await (await fetch(`/list?userId=${isSignedIn()}`)).json();
+  const list = await (await fetch(`/list?userId=${isSignedIn()}`)).json();
 
-        const table = Object.assign(document.createElement('table'));
-        content.appendChild(table);
-        const header = document.createElement('tr');
-        header.appendChild(Object.assign(document.createElement('th'), { textContent: 'Title' }))
-        header.appendChild(Object.assign(document.createElement('th'), { textContent: 'Last Read' }))
-        header.appendChild(Object.assign(document.createElement('th'), { textContent: 'Newest Chapter' }))
-        table.appendChild(header);
-
-        list.forEach(async book => {
-          const html = new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL_1 + book.url.split("/").slice(0, -1).join('/')}`)).text(), 'text/html');
-          const image = html.querySelector(".manga-info-pic>img");
-          const newestChapter = html.querySelector('.chapter-list > .row > span > a');
-          const row = Object.assign(document.createElement('tr'));
-          const bookTitle = document.createElement('td');
-          const newestChapterTitle = document.createElement('td');
-          const newestChapterLink = document.createElement('td');
-          const newestChapterPath = new URL(newestChapter.href).pathname
-          bookTitle.appendChild(Object.assign(document.createElement('a'), { textContent: book.title, href: newestChapterPath.substring(0, newestChapterPath.lastIndexOf('/'))  }));
-          bookTitle.appendChild(Object.assign(document.createElement('img'), { data: image? image.src : "", src: 'https://placehold.co/386x567', style: "margin:auto;display:block" }));
-          newestChapterTitle.appendChild(Object.assign(document.createElement('a'), { textContent: book.chapter, href: book.url }));
-          newestChapterLink.appendChild(document.createElement('td').appendChild(Object.assign(document.createElement('a'), { textContent: newestChapter.textContent, href: new URL(newestChapter.href).pathname })));
-          row.appendChild(bookTitle);
-          row.appendChild(newestChapterTitle);
-          row.appendChild(newestChapterLink);
-          table.appendChild(row);
-        });
-
-        resolve();
-      })
-    ]
-  );
+  const table = Object.assign(document.createElement('table'));
+  content.appendChild(table);
+  const header = document.createElement('tr');
+  header.appendChild(Object.assign(document.createElement('th'), { textContent: 'Title' }))
+  header.appendChild(Object.assign(document.createElement('th'), { textContent: 'Last Read' }))
+  header.appendChild(Object.assign(document.createElement('th'), { textContent: 'Newest Chapter' }))
+  table.appendChild(header);
+  for (const book of list) {
+    const html = new DOMParser().parseFromString(await (await fetch(`/search?url=${BASE_URL_1 + book.url.split("/").slice(0, -1).join('/')}`)).text(), 'text/html');
+    const image = html.querySelector(".manga-info-pic>img");
+    const newestChapter = html.querySelector('.chapter-list > .row > span > a');
+    const row = Object.assign(document.createElement('tr'));
+    const bookTitle = document.createElement('td');
+    const newestChapterTitle = document.createElement('td');
+    const newestChapterLink = document.createElement('td');
+    const newestChapterPath = new URL(newestChapter.href).pathname
+    bookTitle.appendChild(Object.assign(document.createElement('a'), { textContent: book.title, href: newestChapterPath.substring(0, newestChapterPath.lastIndexOf('/'))  }));
+    bookTitle.appendChild(Object.assign(document.createElement('img'), { data: image? image.src : "", src: 'https://placehold.co/386x567', style: "margin:auto;display:block" }));
+    newestChapterTitle.appendChild(Object.assign(document.createElement('a'), { textContent: book.chapter, href: book.url }));
+    newestChapterLink.appendChild(document.createElement('td').appendChild(Object.assign(document.createElement('a'), { textContent: newestChapter.textContent, href: new URL(newestChapter.href).pathname })));
+    row.appendChild(bookTitle);
+    row.appendChild(newestChapterTitle);
+    row.appendChild(newestChapterLink);
+    table.appendChild(row);
+  }
 
   const promises = Array.from(content.querySelectorAll('img')).map((img, index) => {
     return new Promise(async (resolve) => {
@@ -266,7 +257,6 @@ const renderList = async content => {
         .then(response => response.blob())
         .then(blob => URL.createObjectURL(blob))
         .then(async url => {
-          // console.log("url", url);
           img.src = url;
           await fetch(`/image?userId=${userId}&page=${index}`, { method: 'DELETE' });
           resolve();
