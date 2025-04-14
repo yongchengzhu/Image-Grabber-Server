@@ -256,11 +256,11 @@ const renderList = async content => {
         .then(rs => new Response(rs))
         .then(response => response.blob())
         .then(blob => URL.createObjectURL(blob))
-        .then(async url => {
-          img.src = url;
-          await fetch(`/image?userId=${userId}&page=${index}`, { method: 'DELETE' });
-          resolve();
-        })
+        // .then(async url => {
+        //   img.src = url;
+        //   await fetch(`/image?userId=${userId}&page=${index}`, { method: 'DELETE' });
+        //   resolve();
+        // })
         .catch(console.error);
     });
   });

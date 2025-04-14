@@ -8,6 +8,7 @@ const sendFile = async (res, path, contentType, isDelete=false) => {
     respond(res, 200, contentType, await fs.readFile(path));
     isDelete && await fs.unlink(path);
   } catch (error) {
+    console.log("Failed to send file.", error);
     respond(res, 500, 'text/plain', 'Internal Server Error');
   }
 };
@@ -99,7 +100,7 @@ const deleteAllFilesWithPrefix = async (res, prefix) => {
         .map(file => fs.unlink(path.join('./', file))));
     respond(res, 200, 'text/plain', ''); 
   } catch (error) {
-    console.log(error);
+    console.log("Failed to delete all files with prefix", error);
     respond(res, 500, 'text/plain', 'Internal Server Error');
   }
 }
@@ -111,7 +112,7 @@ const deleteFile = async (res, { userId, page }) => {
       fs.unlink(filePath);
     respond(res, 200, 'text/plain', ''); 
   } catch (error) {
-    console.log(error);
+    console.log("Failed to delete file", error);
     respond(res, 500, 'text/plain', 'Internal Server Error');
   }
 }
