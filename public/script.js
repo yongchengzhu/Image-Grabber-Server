@@ -137,7 +137,7 @@ const getImages = async (url, content) => {
   const userId = isSignedIn();
   const addChapterButtons = () => {
     const buttonContainer = content.appendChild(Object.assign(document.createElement('div'), { className: "button-container" }));
-    [html.querySelector('a.back'), html.querySelector('a.next')]
+    [html.querySelector('a.next'), html.querySelector('a.back')]
     .filter(Boolean)
     .forEach(({ textContent, href }) => {
       buttonContainer.appendChild(Object.assign(document.createElement('button'), { textContent, className: "chapter-button" }))
